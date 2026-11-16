@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#102a2a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Ứng dụng demo bóc tách sắt mỹ thuật: tính mét, khối lượng, xem bản vẽ và đối chiếu lớp phủ.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Bóc tách sắt mỹ thuật</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div><div class="eyebrow">XƯỞNG · BÓC TÁCH</div><h1>Sắt mỹ thuật</h1></div>
+      </div>
+      <div class="top-actions">
+        <span class="save-state" id="saveState"><i></i> Đã lưu trên máy</span>
+        <button class="icon-button" id="installBtn" hidden aria-label="Cài ứng dụng" title="Cài ứng dụng">⇩</button>
+        <button class="icon-button" id="resetBtn" aria-label="Khôi phục dữ liệu mẫu" title="Khôi phục dữ liệu mẫu">↺</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="screen active" id="screen-takeoff" aria-labelledby="takeoffTitle">
+        <div class="page-heading">
+          <div><p class="eyebrow">BẢNG KHỐI LƯỢNG</p><h2 id="takeoffTitle">Kết quả bóc tách</h2><p class="subtle">Nhập chiều dài từng thanh, số lượng và kg/m để tính ngay.</p></div>
+          <span class="demo-tag">BẢN DEMO</span>
+        </div>
+
+        <div class="summary-grid" aria-live="polite">
+          <article class="summary-card summary-primary">
+            <div class="summary-label">Tổng chiều dài thép</div>
+            <div class="summary-value"><strong id="totalMeters">0,00</strong><span>m</span></div>
+            <div class="summary-foot"><span>Sắt thẳng</span><b id="straightMeters">0,00 m</b></div>
+            <div class="summary-foot"><span>Sắt uốn / hoa văn</span><b id="bentMeters">0,00 m</b></div>
+          </article>
+          <article class="summary-card summary-weight">
+            <div class="summary-label">Tổng khối lượng thép</div>
+            <div class="summary-value"><strong id="totalKg">0,00</strong><span>kg</span></div>
+            <div class="summary-foot"><span>Sắt thẳng</span><b id="straightKg">0,00 kg</b></div>
+            <div class="summary-foot"><span>Sắt uốn / hoa văn</span><b id="bentKg">0,00 kg</b></div>
+          </article>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head">
+            <div><span class="section-index">01</span><h3>Sắt thẳng</h3><p class="subtle">Gộp theo chiều dài một thanh × số thanh</p></div>
+            <button class="add-button" id="addStraight">＋ Thêm dòng</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Hạng mục</th><th>Chiều dài / thanh</th><th>Số thanh</th><th>Vật liệu</th><th>kg/m</th><th></th></tr></thead>
+              <tbody id="straightRows"></tbody>
+            </table>
+          </div>
+          <div class="table-total"><span>Tổng sắt thẳng</span><b id="straightTotalLine">0,00 m</b><b id="straightTotalWeight">0,00 kg</b></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head">
+            <div><span class="section-index">02</span><h3>Sắt uốn / hoa văn</h3><p class="subtle">Phân biệt chiều dài đường tâm và chiều dài phôi</p></div>
+            <button class="add-button" id="addBent">＋ Thêm dòng</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table bent-table">
+              <thead><tr><th>Hoa văn / vị trí</th><th>Đường tâm / thanh (mm)</th><th>Phôi / thanh (mm)</th><th>Số thanh</th><th>kg/m</th><th></th></tr></thead>
+              <tbody id="bentRows"></tbody>
+            </table>
+          </div>
+          <div class="table-total"><span>Tổng sắt uốn</span><b id="bentTotalLine">0,00 m tâm</b><b id="bentTotalWeight">0,00 kg</b></div>
+          <p class="inline-note">Khối lượng dùng chiều dài phôi nếu đã nhập; nếu để trống, tạm dùng chiều dài đường tâm.</p>
+        </div>
+
+        <div class="section-card">
+          <div class="section-head">
+            <div><span class="section-index">03</span><h3>Phụ kiện hoa / lá</h3><p class="subtle">Đếm riêng, không cộng vào mét thép thanh</p></div>
+            <button class="add-button" id="addAccessory">＋ Thêm phụ kiện</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table accessory-table">
+              <thead><tr><th>Loại phụ kiện</th><th>Số lượng</th><th>Khối lượng / cái (kg)</th><th>Tổng (kg)</th><th></th></tr></thead>
+              <tbody id="accessoryRows"></tbody>
+            </table>
+          </div>
+          <div class="table-total"><span>Tổng phụ kiện</span><b id="accessoryCount">0 cái</b><b id="accessoryKg">0,00 kg</b></div>
+        </div>
+
+        <div class="section-card material-card">
+          <div class="section-head compact-head"><div><span class="section-index">04</span><h3>Quy cách & công thức</h3></div><button class="text-button" id="toggleFormula" aria-expanded="false">Mở chi tiết⌄</button></div>
+          <div class="formula-content" id="formulaContent" hidden>
+            <div class="formula-grid">
+              <div><b>Thép đặc vuông</b><code>a × a × 0,00785</code></div>
+              <div><b>Thép tròn đặc</b><code>π × d² / 4 × 0,00785</code></div>
+              <div><b>Thép la</b><code>rộng × dày × 0,00785</code></div>
+              <div><b>Thép hộp</b><code>[A×B − (A−2t)(B−2t)] × 0,00785</code></div>
+            </div>
+            <p class="inline-note">Đơn vị kích thước: mm. Khối lượng lý thuyết: kg/m, mật độ thép 7.850 kg/m³. Danh sách là quy cách mẫu; với quy cách khác, chọn “Tự nhập kg/m” và nhập số liệu theo nhà cung cấp.</p>
+          </div>
+        </div>
+
+        <div class="notice-card"><span class="notice-icon">i</span><div><b>Lưu ý về bản demo</b><p>Các dòng mẫu lấy từ thông tin đã trao đổi, không phải kết quả nhận dạng tự động. Chân và thanh nối chưa rõ tiết diện nên chưa tính kg; số lượng thanh đứng và các chi tiết cần đối chiếu bản vẽ thi công trước khi chốt.</p></div></div>
+      </section>
+
+      <section class="screen" id="screen-drawing" aria-labelledby="drawingTitle">
+        <div class="page-heading">
+          <div><p class="eyebrow">HỒ SƠ ĐẦU VÀO</p><h2 id="drawingTitle">Bản vẽ & đối chiếu</h2><p class="subtle">Giữ nguyên ảnh gốc; có thể nạp PDF, ảnh hoặc lớp phủ PNG.</p></div>
+          <span class="demo-tag">XEM / SO SÁNH</span>
+        </div>
+        <div class="upload-panel">
+          <label class="upload-control" for="drawingInput"><span class="upload-symbol">＋</span><span><b>Chọn bản vẽ PDF / ảnh</b><small>PNG, JPG, WEBP hoặc PDF</small></span></label>
+          <input id="drawingInput" type="file" accept="application/pdf,image/png,image/jpeg,image/webp" hidden>
+          <div class="file-caption" id="fileCaption">Đang xem ảnh raster của bản vẽ LBG-01 đã cung cấp</div>
+        </div>
+        <div class="viewer-card">
+          <div class="viewer-toolbar">
+            <div><b id="viewerTitle">MẶT BẰNG LBG-01</b><small id="viewerSub">Ảnh gốc · không chỉnh sửa</small></div>
+            <button class="small-button" id="fitDrawing">Vừa khung</button>
+          </div>
+          <div class="drawing-stage" id="drawingStage">
+            <img id="sourceImage" src="assets/lbg01.png" alt="Bản vẽ gốc LBG-01" draggable="false">
+            <img id="overlayImage" alt="Lớp phủ đối chiếu" hidden draggable="false">
+            <iframe id="pdfFrame" title="Bản vẽ PDF" hidden></iframe>
+            <div class="empty-view" id="emptyView" hidden>Chọn tệp PDF hoặc ảnh để xem bản vẽ</div>
+          </div>
+          <div class="viewer-controls">
+            <label class="switch-line"><input type="checkbox" id="showOriginal" checked><span class="switch"></span><span>Hiện bản gốc</span></label>
+            <label class="switch-line"><input type="checkbox" id="showOverlay" checked><span class="switch"></span><span>Hiện lớp phủ</span></label>
+            <label class="opacity-control">Độ mờ lớp phủ <input id="overlayOpacity" type="range" min="10" max="100" value="75"><b id="opacityValue">75%</b></label>
+          </div>
+        </div>
+        <div class="section-card overlay-card">
+          <div class="section-head compact-head"><div><span class="section-index">05</span><h3>Lớp phủ đối chiếu</h3><p class="subtle">Nạp PNG trong suốt đã căn cùng kích thước / tọa độ ảnh gốc.</p></div></div>
+          <label class="upload-control overlay-upload" for="overlayInput"><span class="upload-symbol">⇧</span><span><b>Nạp ảnh lớp phủ PNG</b><small>Hiển thị chồng khít lên ảnh gốc để kiểm tra</small></span></label>
+          <input id="overlayInput" type="file" accept="image/png,image/webp" hidden>
+          <div class="overlay-status" id="overlayStatus">Chưa có lớp centerline / skeleton được tạo trong bản demo.</div>
+        </div>
+        <div class="notice-card"><span class="notice-icon">!</span><div><b>Giới hạn xử lý hiện tại</b><p>Ứng dụng đang hiển thị ảnh gốc và PDF bằng trình xem của trình duyệt. Chưa có engine đọc vector PDF, DWG/DXF, skeleton hóa hoa văn, nối đường qua giao điểm hay phân loại hoa/lá. Lớp phủ chỉ dùng để xem ảnh PNG đã có sẵn, không tự sinh đường tâm.</p></div></div>
+      </section>
+
+      <section class="screen" id="screen-guide" aria-labelledby="guideTitle">
+        <div class="page-heading"><div><p class="eyebrow">HƯỚNG DẪN</p><h2 id="guideTitle">Cách dùng bản demo</h2><p class="subtle">Bản chạy thử tập trung vào xem bản vẽ và tính mét / kg.</p></div></div>
+        <div class="guide-list">
+          <article><span>01</span><div><b>Nhập sắt thẳng</b><p>Điền chiều dài một thanh, số thanh, chọn quy cách. Trường kg/m có thể sửa trực tiếp.</p></div></article>
+          <article><span>02</span><div><b>Nhập sắt uốn</b><p>Ghi chiều dài đường tâm riêng với chiều dài phôi sau khi tính bù uốn. Nếu chưa có chiều dài phôi, ứng dụng tạm tính khối lượng theo đường tâm.</p></div></article>
+          <article><span>03</span><div><b>Đếm hoa / lá</b><p>Nhập số lượng phụ kiện và khối lượng mỗi cái nếu biết. Phụ kiện không cộng vào tổng mét thép thanh.</p></div></article>
+          <article><span>04</span><div><b>Đối chiếu bản vẽ</b><p>Nạp PDF hoặc ảnh. Nếu có ảnh centerline PNG đã căn đúng tọa độ, nạp vào lớp phủ để bật / tắt so sánh.</p></div></article>
+        </div>
+        <div class="section-card status-card"><h3>Trạng thái chức năng</h3>
+          <div class="status-row"><span>Tính mét, kg/m, tổng kg</span><b class="status-ok">Đã chạy</b></div>
+          <div class="status-row"><span>Lưu dữ liệu trên thiết bị</span><b class="status-ok">Đã chạy</b></div>
+          <div class="status-row"><span>Xem ảnh gốc / PDF</span><b class="status-ok">Đã chạy</b></div>
+          <div class="status-row"><span>Bật / tắt ảnh lớp phủ PNG</span><b class="status-ok">Đã chạy</b></div>
+          <div class="status-row"><span>Đọc vector PDF / kích thước tự động</span><b class="status-pending">Chưa tích hợp</b></div>
+          <div class="status-row"><span>Đọc DWG / DXF</span><b class="status-pending">Chưa tích hợp</b></div>
+          <div class="status-row"><span>Centerline / xử lý giao điểm</span><b class="status-pending">Chưa tích hợp</b></div>
+          <div class="status-row"><span>Nhận diện phụ kiện hoa / lá</span><b class="status-pending">Chưa tích hợp</b></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Điều hướng chính">
+      <button class="nav-item active" data-screen="takeoff"><span>▦</span><b>Bóc tách</b></button>
+      <button class="nav-item" data-screen="drawing"><span>▧</span><b>Bản vẽ</b></button>
+      <button class="nav-item" data-screen="guide"><span>ⓘ</span><b>Hướng dẫn</b></button>
+    </nav>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
